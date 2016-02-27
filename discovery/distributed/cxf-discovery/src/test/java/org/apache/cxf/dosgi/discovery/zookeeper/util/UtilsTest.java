@@ -95,7 +95,7 @@ public class UtilsTest extends TestCase {
         String[] scopes = new String[]{"myScope=test", ""};
 
         @SuppressWarnings("unchecked")
-        ServiceReference<EndpointListener> sref = c.createMock(ServiceReference.class);
+        ServiceReference sref = c.createMock(ServiceReference.class);
         EasyMock.expect(sref.getProperty(EasyMock.eq(EndpointListener.ENDPOINT_LISTENER_SCOPE)))
             .andReturn(scopes).anyTimes();
 

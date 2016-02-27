@@ -18,36 +18,33 @@
  */
 package org.apache.cxf.dosgi.dsw.handlers;
 
-import java.io.Closeable;
 import java.util.Map;
 
-public class ExportResult {
+import org.apache.cxf.dosgi.dsw.qos.IntentUnsatisfiedException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.remoteserviceadmin.EndpointDescription;
 
-    private final Map<String, Object> endpointProps;
-    private final Closeable server;
-    private final Exception exception;
+public class DummyConfigurationType implements ConfigurationTypeHandler {
 
-    public ExportResult(Map<String, Object> endpointProps, Closeable server) {
-        this.endpointProps = endpointProps;
-        this.server = server;
-        this.exception = null;
+    @Override
+    public String[] getSupportedTypes() {
+        return new String[]{};
     }
 
-    public ExportResult(Map<String, Object> endpointProps, Exception ex) {
-        this.endpointProps = endpointProps;
-        this.server = null;
-        this.exception = ex;
+    @Override
+    public ExportResult createServer(ServiceReference serviceReference, BundleContext dswContext,
+            BundleContext callingContext, Map<String, Object> sd, Class<?> iClass, Object serviceBean) {
+        return null;
     }
 
-    public Map<String, Object> getEndpointProps() {
-        return endpointProps;
+    @Override
+    public Object createProxy(ServiceReference serviceReference, BundleContext dswContext, BundleContext callingContext,
+            Class<?> iClass, EndpointDescription endpoint) throws IntentUnsatisfiedException {
+        return null;
     }
 
-    public Closeable getServer() {
-        return server;
-    }
-
-    public Exception getException() {
-        return exception;
-    }
 }
+
+
+

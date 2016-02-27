@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Creates local EndpointListeners that publish to ZooKeeper.
  */
-public class PublishingEndpointListenerFactory implements ServiceFactory<PublishingEndpointListener> {
+public class PublishingEndpointListenerFactory implements ServiceFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(PublishingEndpointListenerFactory.class);
 
@@ -53,7 +53,7 @@ public class PublishingEndpointListenerFactory implements ServiceFactory<Publish
         this.zk = zk;
     }
 
-    public PublishingEndpointListener getService(Bundle b, ServiceRegistration<PublishingEndpointListener> sr) {
+    public PublishingEndpointListener getService(Bundle b, ServiceRegistration sr) {
         LOG.debug("new EndpointListener from factory");
         synchronized (listeners) {
             PublishingEndpointListener pel = new PublishingEndpointListener(zk, bctx);
@@ -62,12 +62,12 @@ public class PublishingEndpointListenerFactory implements ServiceFactory<Publish
         }
     }
 
-    public void ungetService(Bundle b, ServiceRegistration<PublishingEndpointListener> sr, 
-                             PublishingEndpointListener pel) {
+    public void ungetService(Bundle b, ServiceRegistration sr,
+                             Object pel) {
         LOG.debug("remove EndpointListener");
         synchronized (listeners) {
             if (listeners.remove(pel)) {
-                pel.close();
+                ((PublishingEndpointListener)pel).close();
             }
         }
     }
@@ -102,4 +102,5 @@ public class PublishingEndpointListenerFactory implements ServiceFactory<Publish
             return listeners;
         }
     }
+
 }

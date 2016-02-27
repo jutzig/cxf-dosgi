@@ -51,37 +51,37 @@ public class LocalDiscovery implements BundleListener {
     final BundleContext bundleContext;
 
     EndpointDescriptionBundleParser bundleParser;
-    ServiceTracker<EndpointListener, EndpointListener> listenerTracker;
+    ServiceTracker listenerTracker;
 
     public LocalDiscovery(BundleContext bc) {
         this.bundleParser = new EndpointDescriptionBundleParser();
         bundleContext = bc;
 
-        listenerTracker = new ServiceTracker<EndpointListener, EndpointListener>(bundleContext, 
-            EndpointListener.class, null) {
+        listenerTracker = new ServiceTracker(bundleContext,
+            EndpointListener.class.getName(), null) {
 
             @Override
-            public EndpointListener addingService(ServiceReference<EndpointListener> reference) {
-                EndpointListener service = super.addingService(reference);
+            public EndpointListener addingService(ServiceReference reference) {
+                EndpointListener service = (EndpointListener)super.addingService(reference);
                 addListener(reference, service);
                 return service;
             }
 
             @Override
-            public void modifiedService(ServiceReference<EndpointListener> reference, EndpointListener service) {
+            public void modifiedService(ServiceReference reference, Object service) {
                 super.modifiedService(reference, service);
-                removeListener(service);
+                removeListener((EndpointListener)service);
 
                 // This may cause duplicate registrations of remote services,
                 // but that's fine and should be filtered out on another level.
                 // See Remote Service Admin spec section 122.6.3
-                addListener(reference, service);
+                addListener(reference, (EndpointListener)service);
             }
 
             @Override
-            public void removedService(ServiceReference<EndpointListener> reference, EndpointListener service) {
+            public void removedService(ServiceReference reference, Object service) {
                 super.removedService(reference, service);
-                removeListener(service);
+                removeListener((EndpointListener)service);
             }
         };
         listenerTracker.open();
@@ -103,7 +103,7 @@ public class LocalDiscovery implements BundleListener {
         }
     }
 
-    void addListener(ServiceReference<EndpointListener> endpointListenerRef, EndpointListener endpointListener) {
+    void addListener(ServiceReference endpointListenerRef, EndpointListener endpointListener) {
         List<String> filters = Utils.getStringPlusProperty(endpointListenerRef,
                 EndpointListener.ENDPOINT_LISTENER_SCOPE);
         if (filters.isEmpty()) {

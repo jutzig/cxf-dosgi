@@ -34,6 +34,7 @@
 
     <properties>
         <topDirectoryLocation>../..</topDirectoryLocation>
+<!--        <cxf.version>2.4.9</cxf.version> -->
     </properties>
 
     <dependencies>
@@ -44,47 +45,61 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
+            <version>4.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.remoteserviceadmin</artifactId>
+            <version>1.1.0</version>
         </dependency>
 
-        <dependency>
+         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-core</artifactId>
-            <version>${cxf.version}</version>
+            <version>3.1.5</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>
             <version>${cxf.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
             <version>${cxf.version}</version>
+            <optional>true</optional>
         </dependency>
-		<dependency>
+ 		<dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-rs-client</artifactId>
             <version>${cxf.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-databinding-aegis</artifactId>
             <version>${cxf.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-rs-extension-providers</artifactId>
             <version>${cxf.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-servlet_${servlet.version}_spec</artifactId>
             <version>1.0</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -121,13 +136,14 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
                             javax.servlet*;version="[0.0,4)",
+                            org.osgi.service.remoteserviceadmin;version="[1,2)",
                             *
                         </Import-Package>
                         <Export-Package>
                             org.apache.cxf.dosgi.dsw*,!*
                         </Export-Package>
                         <Bundle-Activator>org.apache.cxf.dosgi.dsw.Activator</Bundle-Activator>
-                        
+
                         <!-- Is currently needed to create a proxy of an interface given in String form -->
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>

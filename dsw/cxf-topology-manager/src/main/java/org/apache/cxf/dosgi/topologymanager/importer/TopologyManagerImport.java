@@ -93,16 +93,16 @@ public class TopologyManagerImport implements EndpointListener, RemoteServiceAdm
     public TopologyManagerImport(BundleContext bc, SimpleServiceTracker<RemoteServiceAdmin> rsaTracker) {
         bctx = bc;
         remoteServiceAdminTracker = rsaTracker;
-        remoteServiceAdminTracker.addListener(new SimpleServiceTrackerListener<RemoteServiceAdmin>() {
+        remoteServiceAdminTracker.addListener(new SimpleServiceTrackerListener() {
 
-            public void added(ServiceReference<RemoteServiceAdmin> reference, RemoteServiceAdmin rsa) {
-                triggerImportsForRemoteServiceAdmin(rsa);
+            public void added(ServiceReference reference, Object rsa) {
+                triggerImportsForRemoteServiceAdmin((RemoteServiceAdmin)rsa);
             }
 
-            public void modified(ServiceReference<RemoteServiceAdmin> reference, RemoteServiceAdmin rsa) {
+            public void modified(ServiceReference reference, Object rsa) {
             }
 
-            public void removed(ServiceReference<RemoteServiceAdmin> reference, RemoteServiceAdmin rsa) {
+            public void removed(ServiceReference reference, Object rsa) {
                 // the RSA's imports will be closed by its shutdown, so nothing to do here
             }
         });

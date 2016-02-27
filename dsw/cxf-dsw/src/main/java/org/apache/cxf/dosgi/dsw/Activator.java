@@ -25,13 +25,10 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.cxf.Bus;
-import org.apache.cxf.BusFactory;
 import org.apache.cxf.dosgi.dsw.decorator.ServiceDecorator;
 import org.apache.cxf.dosgi.dsw.decorator.ServiceDecoratorBundleListener;
 import org.apache.cxf.dosgi.dsw.decorator.ServiceDecoratorImpl;
 import org.apache.cxf.dosgi.dsw.handlers.ConfigTypeHandlerFactory;
-import org.apache.cxf.dosgi.dsw.handlers.HttpServiceManager;
 import org.apache.cxf.dosgi.dsw.qos.DefaultIntentMapFactory;
 import org.apache.cxf.dosgi.dsw.qos.IntentManager;
 import org.apache.cxf.dosgi.dsw.qos.IntentManagerImpl;
@@ -60,11 +57,9 @@ public class Activator implements ManagedService, BundleActivator {
     private ServiceRegistration rsaFactoryReg;
     private ServiceRegistration decoratorReg;
     private IntentTracker intentTracker;
-    private HttpServiceManager httpServiceManager;
     private BundleContext bc;
     private BundleListener bundleListener;
     private Map<String, Object> curConfiguration;
-    private Bus bus;
 
     public void start(BundleContext bundlecontext) throws Exception {
         LOG.debug("RemoteServiceAdmin Implementation is starting up");
@@ -81,8 +76,7 @@ public class Activator implements ManagedService, BundleActivator {
     }
 
     private synchronized void init(Map<String, Object> config) {
-        bus = BusFactory.newInstance().createBus();
-        
+
         String httpBase = (String) config.get(org.apache.cxf.dosgi.dsw.Constants.HTTP_BASE);
         String cxfServletAlias = (String) config.get(org.apache.cxf.dosgi.dsw.Constants.CXF_SERVLET_ALIAS);
 
@@ -90,9 +84,8 @@ public class Activator implements ManagedService, BundleActivator {
         intentTracker = new IntentTracker(bc, intentMap);
         intentTracker.open();
         IntentManager intentManager = new IntentManagerImpl(intentMap, DEFAULT_INTENT_TIMEOUT);
-        httpServiceManager = new HttpServiceManager(bc, httpBase, cxfServletAlias);
         ConfigTypeHandlerFactory configTypeHandlerFactory
-            = new ConfigTypeHandlerFactory(bc, intentManager, httpServiceManager);
+            = new ConfigTypeHandlerFactory(bc, intentManager);
         RemoteServiceAdminCore rsaCore = new RemoteServiceAdminCore(bc, configTypeHandlerFactory);
         RemoteServiceadminFactory rsaf = new RemoteServiceadminFactory(rsaCore);
         Dictionary<String, Object> props = new Hashtable<String, Object>();
@@ -121,10 +114,6 @@ public class Activator implements ManagedService, BundleActivator {
             // This also triggers the unimport and unexport of the remote services
             rsaFactoryReg.unregister();
             rsaFactoryReg = null;
-        }
-        if (httpServiceManager != null) {
-            httpServiceManager.close();
-            httpServiceManager = null;
         }
         if (intentTracker != null) {
             intentTracker.close();
@@ -162,10 +151,7 @@ public class Activator implements ManagedService, BundleActivator {
      * Causes also the shutdown of the embedded HTTP server
      */
     private void shutdownCXFBus() {
-        if (bus != null) {
-            LOG.debug("Shutting down the CXF Bus");
-            bus.shutdown(true);
-        }
+        LOG.debug("Shutting down the CXF Bus");
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

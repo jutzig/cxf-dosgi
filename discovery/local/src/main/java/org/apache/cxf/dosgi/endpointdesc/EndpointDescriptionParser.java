@@ -40,15 +40,13 @@ public class EndpointDescriptionParser {
     private JAXBContext jaxbContext;
 
     public EndpointDescriptionParser() {
-        try {
-            jaxbContext = JAXBContext.newInstance(EndpointDescriptionsType.class.getPackage().getName(),
-                                                  this.getClass().getClassLoader());
-        } catch (JAXBException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+
     }
 
     public List<EndpointDescriptionType> getEndpointDescriptions(InputStream is) {
+        if (jaxbContext == null) {
+            jaxbContext = createJaxbContext();
+        }
         try {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             Source source = new StreamSource(is);
@@ -61,12 +59,15 @@ public class EndpointDescriptionParser {
     }
 
     public void writeTo(EndpointDescriptionsType endpointDescriptions, OutputStream os) {
+        if (jaxbContext == null) {
+            jaxbContext = createJaxbContext();
+        }
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             QName name = new QName("http://www.osgi.org/xmlns/rsa/v1.0.0", "endpoint-descriptions");
-            JAXBElement<EndpointDescriptionsType> el = 
-                new JAXBElement<EndpointDescriptionsType>(name, EndpointDescriptionsType.class, 
+            JAXBElement<EndpointDescriptionsType> el =
+                new JAXBElement<EndpointDescriptionsType>(name, EndpointDescriptionsType.class,
                     endpointDescriptions);
             marshaller.marshal(el, os);
         } catch (Exception ex) {
@@ -79,7 +80,17 @@ public class EndpointDescriptionParser {
             }
         }
     }
-    
+
+    private JAXBContext createJaxbContext() {
+        try {
+//          Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            return JAXBContext.newInstance(EndpointDescriptionsType.class.getPackage().
+                                           getName(), getClass().getClassLoader());
+        } catch (JAXBException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     public byte[] getData(EndpointDescriptionType endpointDescription) {
         EndpointDescriptionsType endpointDescriptions = new EndpointDescriptionsType();
         endpointDescriptions.getEndpointDescription().add(endpointDescription);

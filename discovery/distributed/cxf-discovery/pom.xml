@@ -40,10 +40,12 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
+            <version>4.2.0</version>
         </dependency>
 
         <dependency>
@@ -109,6 +111,11 @@
                         <Export-Package>
                             !*
                         </Export-Package>
+                        <Import-Package>
+                            org.osgi.framework;version="[1.5,2)",
+                            org.osgi.service.remoteserviceadmin;version="[1,2)",
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

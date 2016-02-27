@@ -23,8 +23,6 @@ import java.util.Hashtable;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.service.cm.ManagedService;
 
 public class Activator implements BundleActivator {
 
@@ -33,8 +31,8 @@ public class Activator implements BundleActivator {
     public synchronized void start(BundleContext bc) throws Exception {
         zkd = new ZooKeeperDiscovery(bc);
         Dictionary<String, String> props = new Hashtable<String, String>();
-        props.put(Constants.SERVICE_PID, "org.apache.cxf.dosgi.discovery.zookeeper");
-        bc.registerService(ManagedService.class.getName(), zkd, props);
+//        props.put(Constants.SERVICE_PID, "org.apache.cxf.dosgi.discovery.zookeeper");
+        bc.registerService(ZooKeeperDiscovery.class.getName(), zkd, props);
     }
 
     public synchronized void stop(BundleContext bc) throws Exception {

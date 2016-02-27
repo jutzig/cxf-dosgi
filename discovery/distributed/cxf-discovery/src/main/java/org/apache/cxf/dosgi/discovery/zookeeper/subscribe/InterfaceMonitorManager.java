@@ -51,14 +51,14 @@ public class InterfaceMonitorManager {
     private final BundleContext bctx;
     private final ZooKeeper zk;
     // map of EndpointListeners and the scopes they are interested in
-    private final Map<ServiceReference<EndpointListener>, List<String>> endpointListenerScopes =
-            new HashMap<ServiceReference<EndpointListener>, List<String>>();
+    private final Map<ServiceReference, List<String>> endpointListenerScopes =
+            new HashMap<ServiceReference, List<String>>();
     // map of scopes and their interest data
     private final Map<String, Interest> interests = new HashMap<String, Interest>();
 
     protected static class Interest {
-        List<ServiceReference<EndpointListener>> endpointListeners = 
-            new CopyOnWriteArrayList<ServiceReference<EndpointListener>>();
+        List<ServiceReference> endpointListeners =
+            new CopyOnWriteArrayList<ServiceReference>();
         InterfaceMonitor monitor;
     }
 
@@ -67,7 +67,7 @@ public class InterfaceMonitorManager {
         this.zk = zk;
     }
 
-    public void addInterest(ServiceReference<EndpointListener> endpointListener) {
+    public void addInterest(ServiceReference endpointListener) {
         if (isOurOwnEndpointListener(endpointListener)) {
             LOG.debug("Skipping our own EndpointListener");
             return;
@@ -84,13 +84,13 @@ public class InterfaceMonitorManager {
         }
     }
 
-    private static boolean isOurOwnEndpointListener(ServiceReference<EndpointListener> endpointListener) {
+    private static boolean isOurOwnEndpointListener(ServiceReference endpointListener) {
         return Boolean.parseBoolean(String.valueOf(
                 endpointListener.getProperty(ZooKeeperDiscovery.DISCOVERY_ZOOKEEPER_ID)));
     }
 
     @SuppressWarnings("unchecked")
-    public synchronized void addInterest(ServiceReference<EndpointListener> endpointListener, 
+    public synchronized void addInterest(ServiceReference endpointListener,
                                          String scope, String objClass) {
         // get or create interest for given scope and add listener to it
         Interest interest = interests.get(scope);
@@ -124,7 +124,7 @@ public class InterfaceMonitorManager {
         }
     }
 
-    public synchronized void removeInterest(ServiceReference<EndpointListener> endpointListener) {
+    public synchronized void removeInterest(ServiceReference endpointListener) {
         LOG.info("removing EndpointListener interests: {}", endpointListener);
         List<String> scopes = endpointListenerScopes.get(endpointListener);
         if (scopes == null) {
@@ -160,9 +160,9 @@ public class InterfaceMonitorManager {
     }
 
     private void notifyListeners(EndpointDescription endpoint, String currentScope, boolean isAdded,
-            List<ServiceReference<EndpointListener>> endpointListeners) {
-        for (ServiceReference<EndpointListener> endpointListenerRef : endpointListeners) {
-            EndpointListener service = bctx.getService(endpointListenerRef);
+            List<ServiceReference> endpointListeners) {
+        for (ServiceReference endpointListenerRef : endpointListeners) {
+            EndpointListener service = (EndpointListener)bctx.getService(endpointListenerRef);
             try {
                 EndpointListener endpointListener = (EndpointListener)service;
                 LOG.trace("matching {} against {}", endpoint, currentScope);
@@ -212,7 +212,7 @@ public class InterfaceMonitorManager {
     /**
      * Only for test case!
      */
-    protected synchronized Map<ServiceReference<EndpointListener>, List<String>> getEndpointListenerScopes() {
+    protected synchronized Map<ServiceReference, List<String>> getEndpointListenerScopes() {
         return endpointListenerScopes;
     }
 }

@@ -57,21 +57,21 @@ public class EndpointListenerNotifier {
             throw new RuntimeException("Unexpected exception creating filter", e);
         }
         this.endpointListenerTracker = new SimpleServiceTracker(bctx, filter);
-        this.endpointListenerTracker.addListener(new SimpleServiceTrackerListener<EndpointListener>() {
+        this.endpointListenerTracker.addListener(new SimpleServiceTrackerListener() {
             @Override
-            public void added(ServiceReference<EndpointListener> reference, EndpointListener service) {
+            public void added(ServiceReference reference, Object service) {
                 LOG.debug("new EndpointListener detected");
                 notifyListener(true, reference, endpointRepository.getAllEndpoints());
             }
 
             @Override
-            public void modified(ServiceReference<EndpointListener> reference, EndpointListener service) {
+            public void modified(ServiceReference reference, Object service) {
                 LOG.debug("EndpointListener modified");
                 notifyListener(true, reference, endpointRepository.getAllEndpoints());
             }
 
             @Override
-            public void removed(ServiceReference<EndpointListener> reference, EndpointListener service) {
+            public void removed(ServiceReference reference, Object service) {
             }
         });
     }

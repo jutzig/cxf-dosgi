@@ -43,21 +43,15 @@ public class ConfigTypeHandlerFactory {
     protected final List<String> supportedConfigurationTypes;
 
     private IntentManager intentManager;
-    private PojoConfigurationTypeHandler pojoConfigurationTypeHandler;
-    private JaxRSPojoConfigurationTypeHandler jaxRsPojoConfigurationTypeHandler;
-    private WsdlConfigurationTypeHandler wsdlConfigurationTypeHandler;
+    private ConfigurationTypeHandler pojoConfigurationTypeHandler = new DummyConfigurationType();
+    private ConfigurationTypeHandler jaxRsPojoConfigurationTypeHandler = new DummyConfigurationType();
+    private ConfigurationTypeHandler wsdlConfigurationTypeHandler = new DummyConfigurationType();
     private ConfigTypeHandlerTracker handlerTracker;
 
-    public ConfigTypeHandlerFactory(BundleContext bc, IntentManager intentManager,
-                                    HttpServiceManager httpServiceManager) {
+    public ConfigTypeHandlerFactory(BundleContext bc, IntentManager intentManager) {
         this.handlerTracker = new ConfigTypeHandlerTracker(bc);
         handlerTracker.open(true);
         this.intentManager = intentManager;
-        this.pojoConfigurationTypeHandler = new PojoConfigurationTypeHandler(bc, intentManager, httpServiceManager);
-        this.jaxRsPojoConfigurationTypeHandler = new JaxRSPojoConfigurationTypeHandler(bc,
-                                                                                       intentManager,
-                                                                                       httpServiceManager);
-        this.wsdlConfigurationTypeHandler = new WsdlConfigurationTypeHandler(bc, intentManager, httpServiceManager);
         supportedConfigurationTypes = new ArrayList<String>();
         supportedConfigurationTypes.add(Constants.WSDL_CONFIG_TYPE);
         supportedConfigurationTypes.add(Constants.RS_CONFIG_TYPE);
@@ -65,8 +59,7 @@ public class ConfigTypeHandlerFactory {
         supportedConfigurationTypes.add(Constants.WS_CONFIG_TYPE_OLD);
     }
 
-    public ConfigurationTypeHandler getHandler(BundleContext dswBC,
-            Map<String, Object> serviceProperties) {
+    public ConfigurationTypeHandler getHandler(BundleContext dswBC, Map<String, Object> serviceProperties) {
         List<String> configurationTypes = determineConfigurationTypes(serviceProperties);
         return getHandler(dswBC, configurationTypes, serviceProperties);
     }
@@ -76,13 +69,12 @@ public class ConfigTypeHandlerFactory {
         return getHandler(dswBC, configurationTypes, endpoint.getProperties());
     }
 
-    private ConfigurationTypeHandler getHandler(BundleContext dswBC,
-                                               List<String> configurationTypes,
-                                               Map<String, Object> serviceProperties) {
+    private ConfigurationTypeHandler getHandler(BundleContext dswBC, List<String> configurationTypes,
+            Map<String, Object> serviceProperties) {
         intentManager.assertAllIntentsSupported(serviceProperties);
         if (configurationTypes.contains(Constants.WS_CONFIG_TYPE)
-            || configurationTypes.contains(Constants.WS_CONFIG_TYPE_OLD)
-            || configurationTypes.contains(Constants.RS_CONFIG_TYPE)) {
+                || configurationTypes.contains(Constants.WS_CONFIG_TYPE_OLD)
+                || configurationTypes.contains(Constants.RS_CONFIG_TYPE)) {
             boolean jaxrs = isJaxrsRequested(configurationTypes, serviceProperties);
             return jaxrs ? jaxRsPojoConfigurationTypeHandler : pojoConfigurationTypeHandler;
         } else if (configurationTypes.contains(Constants.WSDL_CONFIG_TYPE)) {
@@ -101,8 +93,8 @@ public class ConfigTypeHandlerFactory {
         }
 
         if (types.contains(Constants.RS_CONFIG_TYPE)) {
-            Collection<String> intentsProperty
-                = OsgiUtils.getMultiValueProperty(serviceProperties.get(RemoteConstants.SERVICE_EXPORTED_INTENTS));
+            Collection<String> intentsProperty = OsgiUtils
+                    .getMultiValueProperty(serviceProperties.get(RemoteConstants.SERVICE_EXPORTED_INTENTS));
             boolean hasHttpIntent = false;
             boolean hasSoapIntent = false;
             if (intentsProperty != null) {
@@ -129,8 +121,8 @@ public class ConfigTypeHandlerFactory {
      * supported
      */
     private List<String> determineConfigurationTypes(Map<String, Object> serviceProperties) {
-        String[] requestedConfigurationTypes = Utils.normalizeStringPlus(serviceProperties
-                .get(RemoteConstants.SERVICE_EXPORTED_CONFIGS));
+        String[] requestedConfigurationTypes = Utils
+                .normalizeStringPlus(serviceProperties.get(RemoteConstants.SERVICE_EXPORTED_CONFIGS));
         if (requestedConfigurationTypes == null || requestedConfigurationTypes.length == 0) {
             return Collections.singletonList(DEFAULT_CONFIGURATION_TYPE);
         }
@@ -164,8 +156,8 @@ public class ConfigTypeHandlerFactory {
 
         if (usableConfigurationTypes.isEmpty()) {
             throw new RuntimeException("The supplied endpoint has no compatible configuration type. "
-                    + "Supported types are: " + supportedConfigurationTypes
-                    + "    Types needed by the endpoint: " + remoteConfigurationTypes);
+                    + "Supported types are: " + supportedConfigurationTypes + "    Types needed by the endpoint: "
+                    + remoteConfigurationTypes);
         }
         return usableConfigurationTypes;
     }
@@ -175,8 +167,9 @@ public class ConfigTypeHandlerFactory {
     }
 
     /**
-     * returns a list of all supported configuration types.
-     * The list includes the built-in and contributed types.
+     * returns a list of all supported configuration types. The list includes
+     * the built-in and contributed types.
+     *
      * @return the supported configuration types
      */
     public List<String> getAllSupportedConfigurationTypes() {

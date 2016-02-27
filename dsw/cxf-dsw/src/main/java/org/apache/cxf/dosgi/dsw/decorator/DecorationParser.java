@@ -45,21 +45,14 @@ class DecorationParser {
     private Schema schema;
 
     DecorationParser() {
-        try {
-            jaxbContext = JAXBContext.newInstance(ServiceDecorationsType.class.getPackage().getName(),
-                                                  this.getClass().getClassLoader());
-            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            URL resource = getClass().getResource("/service-decoration.xsd");
-            schema = schemaFactory.newSchema(resource);
-        } catch (JAXBException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        } catch (SAXException e) {
-            throw new RuntimeException("Error loading decorations schema", e);
-        }
+
 
     }
 
     List<ServiceDecorationType> getDecorations(URL resourceURL) {
+        if (jaxbContext == null) {
+            jaxbContext = createJaxbContext();
+        }
         if (resourceURL == null) {
             return new ArrayList<ServiceDecorationType>();
         }
@@ -74,6 +67,22 @@ class DecorationParser {
         } catch (Exception ex) {
             LOG.warn("Problem parsing: " + resourceURL, ex);
             return new ArrayList<ServiceDecorationType>();
+        }
+    }
+
+    private JAXBContext createJaxbContext() {
+        try {
+//            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            jaxbContext = JAXBContext.newInstance(ServiceDecorationsType.class.getPackage().getName(),
+                                                  this.getClass().getClassLoader());
+            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            URL resource = getClass().getResource("/service-decoration.xsd");
+            schema = schemaFactory.newSchema(resource);
+            return jaxbContext;
+        } catch (JAXBException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } catch (SAXException e) {
+            throw new RuntimeException("Error loading decorations schema", e);
         }
     }
 }

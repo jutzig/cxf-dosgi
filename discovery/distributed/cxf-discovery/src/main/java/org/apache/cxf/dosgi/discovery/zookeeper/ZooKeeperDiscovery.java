@@ -20,6 +20,7 @@ package org.apache.cxf.dosgi.discovery.zookeeper;
 
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.Properties;
 
 import org.apache.cxf.dosgi.discovery.zookeeper.publish.PublishingEndpointListenerFactory;
 import org.apache.cxf.dosgi.discovery.zookeeper.subscribe.EndpointListenerTracker;
@@ -31,7 +32,6 @@ import org.apache.zookeeper.ZooKeeper;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.remoteserviceadmin.EndpointListener;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class ZooKeeperDiscovery implements Watcher, ManagedService {
     private final BundleContext bctx;
 
     private PublishingEndpointListenerFactory endpointListenerFactory;
-    private ServiceTracker<EndpointListener, EndpointListener> endpointListenerTracker;
+    private ServiceTracker endpointListenerTracker;
     private InterfaceMonitorManager imManager;
     private ZooKeeper zk;
     private boolean closed;
@@ -55,16 +55,22 @@ public class ZooKeeperDiscovery implements Watcher, ManagedService {
 
     public ZooKeeperDiscovery(BundleContext bctx) {
         this.bctx = bctx;
+        try {
+            updated(new Properties());
+        } catch (ConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     private void setDefaults(Dictionary<String, String> configuration) {
-        Utils.setDefault(configuration, "zookeeper.host", "localhost");
+        Utils.setDefault(configuration, "zookeeper.host", "utzigj02.seeburger.de");
         Utils.setDefault(configuration, "zookeeper.port", "2181");
         Utils.setDefault(configuration, "zookeeper.timeout", "3000");
     }
 
     @SuppressWarnings("unchecked")
-    public synchronized void updated(Dictionary<String, ?> configuration) throws ConfigurationException {
+    public synchronized void updated(Dictionary configuration) throws ConfigurationException {
         LOG.debug("Received configuration update for Zookeeper Discovery: {}", configuration);
         if (configuration != null) {
             setDefaults((Dictionary<String, String>)configuration);
